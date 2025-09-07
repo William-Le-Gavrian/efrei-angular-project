@@ -10,4 +10,10 @@ export const routes: Routes = [
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
+  {
+    path: 'transactions',
+    // canActivate: [authGuard],
+    loadChildren: () =>
+      import('./features/transactions/transactions.routes').then((m) => m.TRANSACTION_ROUTES),
+  },
 ];
