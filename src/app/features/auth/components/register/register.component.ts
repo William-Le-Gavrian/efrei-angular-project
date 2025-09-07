@@ -107,7 +107,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
     </div>
   `,
 })
-export class Register {
+export class RegisterComponent {
   private formBuilder = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);

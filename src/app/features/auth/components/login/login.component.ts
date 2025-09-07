@@ -68,7 +68,7 @@ import { LoginRequest } from '../../models/user.model';
     </div>
   `,
 })
-export class Login {
+export class LoginComponent {
   private formBuilder = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
