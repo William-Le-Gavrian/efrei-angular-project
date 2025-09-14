@@ -101,16 +101,35 @@ import { TransactionChart } from '../transaction-chart/transaction-chart';
                         </div>
                     </div>
 
-                    <button class="btn btn-primary" type="submit">Add transaction</button>
+                    <div class="d-flex gap-3">
+                        @if (-1 !== editingTransaction()) {
+                            <button
+                                class="btn btn-danger"
+                                type="button"
+                                (click)="cancelEditTransaction()"
+                            >
+                                Cancel
+                            </button>
+                            <button class="btn btn-primary" type="submit">
+                                Update Transaction
+                            </button>
+                        } @else {
+                            <button class="btn btn-primary" type="submit">Add transaction</button>
+                        }
+                    </div>
                 </form>
             </div>
 
-            <ul class="transactions-list my-5 overflow-y-auto" style="max-height: 400px">
+            <ul
+                class="transactions-list my-5 overflow-y-auto list-unstyled"
+                style="max-height: 400px"
+            >
                 <li class="row position-sticky top-0 bg-white">
                     <div class="col-3 fs-5 fw-medium">Title</div>
                     <div class="col-2 fs-5 fw-medium">Amount</div>
-                    <div class="col-6 fs-5 fw-medium">Note</div>
-                    <div class="col-1 fs-5 fw-medium">Date</div>
+                    <div class="col-4 fs-5 fw-medium">Note</div>
+                    <div class="col-2 fs-5 fw-medium">Date</div>
+                    <div class="col-1 fs-5 fw-medium">Actions</div>
                 </li>
                 @for (
                     transaction of transactionService.computedTransactions();
@@ -130,11 +149,27 @@ import { TransactionChart } from '../transaction-chart/transaction-chart';
                             {{ transaction.amount }}
                             €
                         </div>
-                        <div class="col-6">{{ transaction.note }}</div>
-                        <div class="col-1">{{ transaction.date | date: 'dd/MM/yyyy' }}</div>
+                        <div class="col-4">{{ transaction.note }}</div>
+                        <div class="col-2">{{ transaction.date | date: 'dd/MM/yyyy' }}</div>
+                        <div class="col-1 d-flex gap-1">
+                            <button
+                                type="button"
+                                class="btn btn-warning"
+                                (click)="startEditTransaction(transaction.id)"
+                            >
+                                E
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-danger"
+                                (click)="deleteTransaction(transaction.id)"
+                            >
+                                D
+                            </button>
+                        </div>
                     </li>
                 } @empty {
-                    <li>There are no transaction</li>
+                    <li class="text-center fs-4 fw-medium">There are no transaction</li>
                 }
             </ul>
         </div>
@@ -147,6 +182,7 @@ export class TransactionComponent implements OnInit {
     transactionForm: FormGroup;
     transactions = signal<Transaction[]>([]);
     addingTransaction = signal(false);
+    editingTransaction = signal<number>(-1);
     loading = signal(false);
     error = signal<string>('');
 
@@ -170,10 +206,17 @@ export class TransactionComponent implements OnInit {
             this.error.set('');
 
             try {
-                this.addingTransaction.set(true);
-                await this.transactionService.createTransaction(
-                    this.transactionForm.value as CreateTransactionRequest,
-                );
+                if (null !== this.editingTransaction) {
+                    await this.transactionService.updateTransaction(
+                        this.editingTransaction(),
+                        this.transactionForm.value,
+                    );
+                } else {
+                    this.addingTransaction.set(true);
+                    await this.transactionService.createTransaction(
+                        this.transactionForm.value as CreateTransactionRequest,
+                    );
+                }
 
                 await this.loadTransactions();
                 await this.cleanTransactionForm();
@@ -195,6 +238,39 @@ export class TransactionComponent implements OnInit {
         } finally {
             this.loading.set(false);
         }
+    }
+
+    async startEditTransaction(id: number) {
+        const transactionToUpdate = this.transactionService.getTransactionById(id);
+        if (!transactionToUpdate) return;
+
+        this.editingTransaction.set(id);
+
+        const { date, ...rest } = transactionToUpdate;
+        this.transactionForm.patchValue({
+            ...rest,
+            date: this.formatDateForInput(date),
+        });
+        await this.loadTransactions();
+    }
+
+    async cancelEditTransaction() {
+        this.editingTransaction.set(-1);
+        await this.cleanTransactionForm();
+    }
+
+    // Format the date to correctly fill the form with the date of the transaction
+    private formatDateForInput(date: Date): string {
+        const d = new Date(date);
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${year}-${month}-${day}`;
+    }
+
+    async deleteTransaction(id: number) {
+        await this.transactionService.deleteTransaction(id);
+        await this.loadTransactions();
     }
 
     async cleanTransactionForm() {

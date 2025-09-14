@@ -84,6 +84,10 @@ export class TransactionService {
         return this.transactions();
     }
 
+    public getTransactionById(id: number): Transaction | undefined {
+        return this.transactions().find((transaction) => transaction.id === id);
+    }
+
     async createTransaction(transactionData: CreateTransactionRequest): Promise<Transaction> {
         const newTransaction: Transaction = {
             id: Date.now(),
@@ -96,6 +100,39 @@ export class TransactionService {
 
         this.transactions.update((transactions) => [...transactions, newTransaction]);
         return newTransaction;
+    }
+
+    async updateTransaction(
+        id: number,
+        transactionData: CreateTransactionRequest,
+    ): Promise<Transaction> {
+        let updatedTransaction: Transaction | null = null;
+
+        this.transactions.update((transactions) => {
+            return transactions.map((transaction) => {
+                if (transaction.id === id) {
+                    updatedTransaction = {
+                        ...transaction,
+                        ...transactionData,
+                        date: new Date(transactionData.date),
+                    };
+                    return updatedTransaction;
+                }
+                return transaction;
+            });
+        });
+
+        if (!updatedTransaction) {
+            throw new Error('Transaction not found');
+        }
+
+        return updatedTransaction;
+    }
+
+    async deleteTransaction(id: number) {
+        this.transactions.update((transactions) => {
+            return transactions.filter((transaction) => transaction.id !== id);
+        });
     }
 
     // Return all the transactions sorted by date from nearest to farthest
