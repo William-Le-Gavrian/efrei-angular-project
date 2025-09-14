@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TransactionChart } from './transaction-chart';
+import { TransactionChartComponent } from './transaction-chart.component';
 
 describe('TransactionChart', () => {
-    let component: TransactionChart;
-    let fixture: ComponentFixture<TransactionChart>;
+    let component: TransactionChartComponent;
+    let fixture: ComponentFixture<TransactionChartComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [TransactionChart],
+            imports: [TransactionChartComponent],
         }).compileComponents();
 
-        fixture = TestBed.createComponent(TransactionChart);
+        fixture = TestBed.createComponent(TransactionChartComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });

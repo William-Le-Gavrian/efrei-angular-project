@@ -139,4 +139,15 @@ export class TransactionService {
     public computedTransactions = computed(() => {
         return [...this.transactions()].sort((a, b) => b.date.getTime() - a.date.getTime());
     });
+
+    // Determine the total balance of an account
+    public computedBalance = computed(() => {
+        const total = this.transactions().reduce(
+            (cpt: number, transaction) =>
+                cpt + (transaction.type === 'income' ? transaction.amount : -transaction.amount),
+            0,
+        );
+
+        return Math.round(total * 100) / 100;
+    });
 }

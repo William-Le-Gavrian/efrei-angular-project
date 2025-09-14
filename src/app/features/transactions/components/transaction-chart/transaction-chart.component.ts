@@ -15,7 +15,7 @@ import { Transaction } from '../../models/transaction.model';
         </div>
     `,
 })
-export class TransactionChart {
+export class TransactionChartComponent {
     transactions = signal<Transaction[]>([]);
 
     private transactionService = inject(TransactionService);

@@ -4,7 +4,8 @@ import { TransactionService } from '../../services/transaction.service';
 import { CreateTransactionRequest, Transaction } from '../../models/transaction.model';
 import { TransactionTypePipe } from '../../../../shared/pipes/transactionType.pipe';
 import { DatePipe } from '@angular/common';
-import { TransactionChart } from '../transaction-chart/transaction-chart';
+import { TransactionChartComponent } from '../transaction-chart/transaction-chart.component';
+import { BalancePipe } from '../../../../shared/pipes/balance.pipe';
 
 @Component({
     selector: 'app-transaction',
@@ -13,13 +14,19 @@ import { TransactionChart } from '../transaction-chart/transaction-chart';
         ReactiveFormsModule,
         TransactionTypePipe,
         DatePipe,
-        TransactionChart,
+        TransactionChartComponent,
+        BalancePipe,
         // RouterLink
     ],
     template: `
         <div class="container">
             <div class="row">
                 <app-transaction-chart class="col-12"></app-transaction-chart>
+            </div>
+
+            <div class="fs-3 text-center text-{{ transactionService.computedBalance() | balance }}">
+                Total balance:
+                <span class="fw-medium">{{ transactionService.computedBalance() }}</span> €
             </div>
 
             <div class="add-transaction-form my-5 border p-4 rounded-4 shadow">
@@ -206,13 +213,14 @@ export class TransactionComponent implements OnInit {
             this.error.set('');
 
             try {
-                if (null !== this.editingTransaction) {
+                this.addingTransaction.set(true);
+
+                if (-1 !== this.editingTransaction()) {
                     await this.transactionService.updateTransaction(
                         this.editingTransaction(),
                         this.transactionForm.value,
                     );
                 } else {
-                    this.addingTransaction.set(true);
                     await this.transactionService.createTransaction(
                         this.transactionForm.value as CreateTransactionRequest,
                     );
