@@ -98,11 +98,6 @@ export class AuthService {
         sessionStorage.removeItem('currentUser');
     }
 
-    // GET - Check if the user is logged in
-    isAuthenticated(): boolean {
-        return this.currentUser() !== null;
-    }
-
     // GET - Get the logged user
     getCurrentUser(): User | null {
         return this.currentUser();

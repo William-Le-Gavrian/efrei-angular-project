@@ -1,59 +1,67 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { CreateTransactionRequest, Transaction } from '../models/transaction.model';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class TransactionService {
-    private transactions = signal<Transaction[]>([
-        {
-            id: 1,
-            title: 'Store',
-            amount: 10.99,
-            note: 'Bought a t-shirt',
-            type: 'expense',
-            date: new Date('2025-02-01'),
-        },
-        {
-            id: 2,
-            title: 'Groceries',
-            amount: 55.84,
-            note: '',
-            type: 'expense',
-            date: new Date('2025-03-01'),
-        },
-        {
-            id: 3,
-            title: 'Salary',
-            amount: 1500.64,
-            note: 'Job salary',
-            type: 'income',
-            date: new Date('2025-01-01'),
-        },
-        // {
-        //     id: 4,
-        //     title: 'Store',
-        //     amount: 10.99,
-        //     note: 'Bought a t-shirt',
-        //     type: 'expense',
-        //     date: new Date('2025-02-01'),
-        // },
-        // {
-        //     id: 5,
-        //     title: 'Groceries',
-        //     amount: 55.84,
-        //     note: '',
-        //     type: 'expense',
-        //     date: new Date('2025-03-01'),
-        // },
-        // {
-        //     id: 6,
-        //     title: 'Salary',
-        //     amount: 1500.64,
-        //     note: 'Job salary',
-        //     type: 'income',
-        //     date: new Date('2025-01-01'),
-        // },
+    private authService = inject(AuthService);
+
+    private transactionsByUser = signal<Record<number, Transaction[]>>({
+        1: [
+            {
+                id: 1,
+                title: 'Store',
+                amount: 10.99,
+                note: 'Bought a t-shirt',
+                type: 'expense',
+                date: new Date('2025-02-01'),
+            },
+            {
+                id: 2,
+                title: 'Groceries',
+                amount: 55.84,
+                note: '',
+                type: 'expense',
+                date: new Date('2025-03-01'),
+            },
+            {
+                id: 3,
+                title: 'Salary',
+                amount: 2000,
+                note: 'Job salary',
+                type: 'income',
+                date: new Date('2025-01-01'),
+            },
+        ],
+        2: [
+            {
+                id: 4,
+                title: 'Garage',
+                amount: 300,
+                note: 'Repair the car',
+                type: 'expense',
+                date: new Date('2025-02-01'),
+            },
+            {
+                id: 5,
+                title: 'Flea market',
+                amount: 156.84,
+                note: 'Sells during flea market',
+                type: 'income',
+                date: new Date('2025-03-01'),
+            },
+            {
+                id: 6,
+                title: 'Salary',
+                amount: 1426.3,
+                note: 'Job salary',
+                type: 'income',
+                date: new Date('2025-01-01'),
+            },
+        ],
+
         // {
         //     id: 7,
         //     title: 'Store',
@@ -78,17 +86,26 @@ export class TransactionService {
         //     type: 'income',
         //     date: new Date('2025-01-01'),
         // },
-    ]);
+    });
+
+    private getCurrentUserId(): number {
+        const currentUserId = this.authService.getCurrentUser();
+        if (!currentUserId) throw new Error('This user does not exist');
+        return currentUserId.id;
+    }
 
     async getAllTransactions(): Promise<Transaction[]> {
-        return this.transactions();
+        return this.transactionsByUser()[this.getCurrentUserId()] || [];
     }
 
     public getTransactionById(id: number): Transaction | undefined {
-        return this.transactions().find((transaction) => transaction.id === id);
+        const currentUserId = this.getCurrentUserId();
+        const userTransactions = this.transactionsByUser()[currentUserId] || [];
+        return userTransactions.find((transaction) => transaction.id === id);
     }
 
     async createTransaction(transactionData: CreateTransactionRequest): Promise<Transaction> {
+        const currentUserId = this.getCurrentUserId();
         const newTransaction: Transaction = {
             id: Date.now(),
             title: transactionData.title,
@@ -98,7 +115,14 @@ export class TransactionService {
             date: new Date(transactionData.date),
         };
 
-        this.transactions.update((transactions) => [...transactions, newTransaction]);
+        this.transactionsByUser.update((state) => {
+            const userTransactions = state[currentUserId] || [];
+            return {
+                ...state,
+                [currentUserId]: [...userTransactions, newTransaction],
+            };
+        });
+
         return newTransaction;
     }
 
@@ -107,9 +131,11 @@ export class TransactionService {
         transactionData: CreateTransactionRequest,
     ): Promise<Transaction> {
         let updatedTransaction: Transaction | null = null;
+        const currentUserId = this.getCurrentUserId();
 
-        this.transactions.update((transactions) => {
-            return transactions.map((transaction) => {
+        this.transactionsByUser.update((transactions) => {
+            const userTransactions = transactions[currentUserId] || [];
+            const updatedTransactionsList = userTransactions.map((transaction) => {
                 if (transaction.id === id) {
                     updatedTransaction = {
                         ...transaction,
@@ -120,6 +146,7 @@ export class TransactionService {
                 }
                 return transaction;
             });
+            return { ...transactions, [currentUserId]: updatedTransactionsList };
         });
 
         if (!updatedTransaction) {
@@ -130,19 +157,28 @@ export class TransactionService {
     }
 
     async deleteTransaction(id: number) {
-        this.transactions.update((transactions) => {
-            return transactions.filter((transaction) => transaction.id !== id);
+        const currentUserId = this.getCurrentUserId();
+        this.transactionsByUser.update((transactions) => {
+            const userTransactions = transactions[currentUserId] || [];
+            return {
+                ...transactions,
+                [currentUserId]: userTransactions.filter((transaction) => transaction.id !== id),
+            };
         });
     }
 
     // Return all the transactions sorted by date from nearest to farthest
     public computedTransactions = computed(() => {
-        return [...this.transactions()].sort((a, b) => b.date.getTime() - a.date.getTime());
+        const currentUserId = this.getCurrentUserId();
+        const userTransactions = this.transactionsByUser()[currentUserId] || [];
+        return [...userTransactions].sort((a, b) => b.date.getTime() - a.date.getTime());
     });
 
     // Determine the total balance of an account
     public computedBalance = computed(() => {
-        const total = this.transactions().reduce(
+        const currentUserId = this.getCurrentUserId();
+        const userTransactions = this.transactionsByUser()[currentUserId] || [];
+        const total = userTransactions.reduce(
             (cpt: number, transaction) =>
                 cpt + (transaction.type === 'income' ? transaction.amount : -transaction.amount),
             0,
