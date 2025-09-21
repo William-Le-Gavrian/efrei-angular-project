@@ -207,6 +207,7 @@ export class TransactionComponent implements OnInit {
         });
     }
 
+    // This method allows either creating a new transaction or editing an existing one
     async onSubmit() {
         if (this.transactionForm.valid) {
             this.loading.set(true);
@@ -248,6 +249,7 @@ export class TransactionComponent implements OnInit {
         }
     }
 
+    // This method is used to fill the form with the Transaction's info we want to edit
     async startEditTransaction(id: number) {
         const transactionToUpdate = this.transactionService.getTransactionById(id);
         if (!transactionToUpdate) return;

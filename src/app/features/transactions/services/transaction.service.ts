@@ -61,31 +61,6 @@ export class TransactionService {
                 date: new Date('2025-01-01'),
             },
         ],
-
-        // {
-        //     id: 7,
-        //     title: 'Store',
-        //     amount: 10.99,
-        //     note: 'Bought a t-shirt',
-        //     type: 'expense',
-        //     date: new Date('2025-02-01'),
-        // },
-        // {
-        //     id: 8,
-        //     title: 'Groceries',
-        //     amount: 55.84,
-        //     note: '',
-        //     type: 'expense',
-        //     date: new Date('2025-03-01'),
-        // },
-        // {
-        //     id: 9,
-        //     title: 'Salary',
-        //     amount: 1500.64,
-        //     note: 'Job salary',
-        //     type: 'income',
-        //     date: new Date('2025-01-01'),
-        // },
     });
 
     private getCurrentUserId(): number {
