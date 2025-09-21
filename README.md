@@ -14,7 +14,7 @@ Once the server is running, open your browser and navigate to `http://localhost:
   npm run build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+This will compile the project and store the build artifacts in the `dist/` directory. 
 
 If you want to build the project for production in order to run it with http-server :
 
@@ -40,3 +40,12 @@ To execute unit tests with the [Karma](https://karma-runner.github.io) test runn
 ```bash
   npm run test
 ```
+
+## Deploy
+
+The app is deployed on this link:
+
+efrei-angular-project-git-dev-william-le-gavrians-projects.vercel.app
+
+The API used to display Apple stocks on a graph in the transactions' page is limited to 8 requests per minute and 800 per day.
+So if the page is reloaded to many times in a short time, the Apple stocks might not appear.
