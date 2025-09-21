@@ -12,20 +12,6 @@ import { AdminUserModal } from '../admin-user-modal/admin-user-modal';
     template: `
         <div class="container my-4">
             <h2 class="fs-1 fw-medium">Admin Dashboard</h2>
-
-            <!--          <div class="d-flex">-->
-            <!--              <nav>-->
-            <!--                  <button-->
-            <!--                      type="button"-->
-            <!--                      class="btn btn-outline-dark"-->
-            <!--                      [class.bg-dark]="activeTab() === 'users'"-->
-            <!--                      [class.text-white]="activeTab() === 'users'"-->
-            <!--                  >-->
-            <!--                      Users-->
-            <!--                  </button>-->
-            <!--              </nav>-->
-            <!--          </div>-->
-
             <ul>
                 <li class="row align-items-center" style="height: 3rem">
                     <div class="col-2">ID</div>
