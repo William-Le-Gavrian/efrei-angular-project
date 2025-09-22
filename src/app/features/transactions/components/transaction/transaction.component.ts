@@ -1,7 +1,7 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TransactionService } from '../../services/transaction.service';
-import { CreateTransactionRequest, Transaction } from '../../models/transaction.model';
+import { CreateTransactionRequest } from '../../models/transaction.model';
 import { TransactionTypePipe } from '../../../../shared/pipes/transactionType.pipe';
 import { DatePipe } from '@angular/common';
 import { TransactionChartComponent } from '../transaction-chart/transaction-chart.component';
@@ -16,7 +16,6 @@ import { BalancePipe } from '../../../../shared/pipes/balance.pipe';
         DatePipe,
         TransactionChartComponent,
         BalancePipe,
-        // RouterLink
     ],
     template: `
         <div class="container">
@@ -182,20 +181,15 @@ import { BalancePipe } from '../../../../shared/pipes/balance.pipe';
         </div>
     `,
 })
-export class TransactionComponent implements OnInit {
+export class TransactionComponent {
     private formBuilder = inject(FormBuilder);
     public transactionService = inject(TransactionService);
 
     transactionForm: FormGroup;
-    transactions = signal<Transaction[]>([]);
     addingTransaction = signal(false);
     editingTransaction = signal<number>(-1);
     loading = signal(false);
     error = signal<string>('');
-
-    async ngOnInit() {
-        await this.loadTransactions();
-    }
 
     constructor() {
         this.transactionForm = this.formBuilder.group({
@@ -227,25 +221,13 @@ export class TransactionComponent implements OnInit {
                     );
                 }
 
-                await this.loadTransactions();
+                // await this.loadTransactions();
                 await this.cleanTransactionForm();
             } catch (error) {
                 throw new Error('Error while adding the transaction: ' + error);
             } finally {
                 this.addingTransaction.set(false);
             }
-        }
-    }
-
-    async loadTransactions() {
-        try {
-            this.loading.set(true);
-            const allTransactions = await this.transactionService.getAllTransactions();
-            this.transactions.set(allTransactions);
-        } catch (error: unknown) {
-            throw new Error('Error while loading the transactions: ' + error);
-        } finally {
-            this.loading.set(false);
         }
     }
 
@@ -261,7 +243,6 @@ export class TransactionComponent implements OnInit {
             ...rest,
             date: this.formatDateForInput(date),
         });
-        await this.loadTransactions();
     }
 
     async cancelEditTransaction() {
@@ -280,7 +261,6 @@ export class TransactionComponent implements OnInit {
 
     async deleteTransaction(id: number) {
         await this.transactionService.deleteTransaction(id);
-        await this.loadTransactions();
     }
 
     async cleanTransactionForm() {
