@@ -27,7 +27,7 @@ import { AuthService } from '../../../features/auth/services/auth.service';
                             <ul class="navbar-nav">
                                 @if (currentUser()) {
                                     <li class="nav-item nav-link text-white align-item">
-                                        Bonjour {{ currentUser()?.name }}
+                                        Hello {{ currentUser()?.name }}
                                     </li>
                                     <li class="nav-item">
                                         <a routerLink="/transactions" class="nav-link text-white"
