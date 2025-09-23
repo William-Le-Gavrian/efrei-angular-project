@@ -1,5 +1,7 @@
 # EfreiAngularProject
 
+## Author: William Le Gavrian
+
 ## Development server
 
 To start a local development server, run:
