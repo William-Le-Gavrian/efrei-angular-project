@@ -45,7 +45,6 @@ export class TransactionChartComponent {
             this.updateStocksChartData();
         });
 
-        // this.loadBalanceData();
         this.loadStocksData();
     }
 
