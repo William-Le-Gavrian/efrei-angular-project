@@ -45,7 +45,7 @@ To execute unit tests with the [Karma](https://karma-runner.github.io) test runn
 
 ## Deploy
 
-The app is deployed on this link: https://efrei-angular-project-git-dev-william-le-gavrians-projects.vercel.app/?_vercel_share=N1W2hLuSJVc1nN01AgoYoaDBbLCTQ6Cv
+The app is deployed on this link: https://efrei-angular-project.vercel.app/auth/login?returnUrl=%2Ftransactions
 
 The API used to display Apple stocks on a graph in the transactions' page is limited to 8 requests per minute and 800 per day.
 So if the page is reloaded too many times in a short time, the Apple stocks might not appear.

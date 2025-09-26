@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PwaService } from '../../services/pwa.service';
 
@@ -8,13 +8,18 @@ import { PwaService } from '../../services/pwa.service';
     imports: [CommonModule],
     template: `
         <!-- Prompt d'installation -->
-        @if (pwaService.canInstall()) {
-            <div class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50">
-                <div class="bg-blue-600 text-white p-4 rounded-lg shadow-lg border border-blue-500">
-                    <div class="flex items-start gap-3">
+        @if (pwaService.canInstall() && show()) {
+            <div
+                class="position-fixed bottom-0 start-0 end-0 mb-3 ms-md-auto me-md-3 z-3"
+                style="max-width: 400px;"
+            >
+                <div class="bg-primary text-white p-3 rounded shadow border border-primary">
+                    <div class="d-flex align-items-start gap-2">
                         <div class="flex-shrink-0 mt-1">
                             <svg
-                                class="h-6 w-6"
+                                class="me-2"
+                                width="24"
+                                height="24"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -27,21 +32,21 @@ import { PwaService } from '../../services/pwa.service';
                                 />
                             </svg>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-semibold text-sm">Installer l'application</h4>
-                            <p class="text-blue-100 text-xs mt-1">
+                        <div class="flex-grow-1">
+                            <h4 class="fw-semibold fs-6 mb-1">Installer l'application</h4>
+                            <p class="text-white-50 small mb-2">
                                 Accédez rapidement à TodoList depuis votre écran d'accueil
                             </p>
-                            <div class="flex gap-2 mt-3">
+                            <div class="d-flex gap-2">
                                 <button
                                     (click)="installApp()"
-                                    class="bg-white text-blue-600 px-3 py-1 rounded text-xs font-medium hover:bg-blue-50 transition-colors"
+                                    class="btn btn-light btn-sm fw-medium"
                                 >
                                     Installer
                                 </button>
                                 <button
                                     (click)="dismissPrompt()"
-                                    class="text-blue-100 px-3 py-1 rounded text-xs hover:text-white transition-colors"
+                                    class="btn btn-link btn-sm text-white-50"
                                 >
                                     Plus tard
                                 </button>
@@ -49,10 +54,11 @@ import { PwaService } from '../../services/pwa.service';
                         </div>
                         <button
                             (click)="dismissPrompt()"
-                            class="flex-shrink-0 text-blue-100 hover:text-white"
+                            class="btn btn-link btn-sm text-white-50 p-0 ms-2"
                         >
                             <svg
-                                class="h-4 w-4"
+                                width="16"
+                                height="16"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -72,14 +78,16 @@ import { PwaService } from '../../services/pwa.service';
 
         <!-- Notification de mise à jour -->
         @if (pwaService.hasUpdate()) {
-            <div class="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50">
-                <div
-                    class="bg-green-600 text-white p-4 rounded-lg shadow-lg border border-green-500"
-                >
-                    <div class="flex items-start gap-3">
+            <div
+                class="position-fixed top-0 start-0 end-0 mt-3 ms-md-auto me-md-3 z-3"
+                style="max-width: 400px;"
+            >
+                <div class="bg-success text-white p-3 rounded shadow border border-success">
+                    <div class="d-flex align-items-start gap-2">
                         <div class="flex-shrink-0 mt-1">
                             <svg
-                                class="h-6 w-6"
+                                width="24"
+                                height="24"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -92,21 +100,21 @@ import { PwaService } from '../../services/pwa.service';
                                 />
                             </svg>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-semibold text-sm">Mise à jour disponible</h4>
-                            <p class="text-green-100 text-xs mt-1">
+                        <div class="flex-grow-1">
+                            <h4 class="fw-semibold fs-6 mb-1">Mise à jour disponible</h4>
+                            <p class="text-white-50 small mb-2">
                                 Une nouvelle version de l'application est prête
                             </p>
-                            <div class="flex gap-2 mt-3">
+                            <div class="d-flex gap-2">
                                 <button
                                     (click)="updateApp()"
-                                    class="bg-white text-green-600 px-3 py-1 rounded text-xs font-medium hover:bg-green-50 transition-colors"
+                                    class="btn btn-light btn-sm fw-medium"
                                 >
                                     Mettre à jour
                                 </button>
                                 <button
                                     (click)="dismissUpdate()"
-                                    class="text-green-100 px-3 py-1 rounded text-xs hover:text-white transition-colors"
+                                    class="btn btn-link btn-sm text-white-50"
                                 >
                                     Plus tard
                                 </button>
@@ -119,10 +127,16 @@ import { PwaService } from '../../services/pwa.service';
 
         <!-- Indicateur hors ligne -->
         @if (!pwaService.online()) {
-            <div class="fixed top-0 left-0 right-0 z-40">
-                <div class="bg-amber-500 text-white text-center py-2 px-4">
-                    <div class="flex items-center justify-center gap-2 text-sm">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="position-fixed top-0 start-0 end-0 z-2">
+                <div class="bg-warning text-white text-center py-2 px-3">
+                    <div class="d-flex align-items-center justify-content-center gap-2 small">
+                        <svg
+                            width="16"
+                            height="16"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
@@ -139,6 +153,7 @@ import { PwaService } from '../../services/pwa.service';
 })
 export class PwaPromptComponent {
     public pwaService = inject(PwaService);
+    show = signal<boolean>(true);
 
     async installApp(): Promise<void> {
         await this.pwaService.installApp();
@@ -149,12 +164,10 @@ export class PwaPromptComponent {
     }
 
     dismissPrompt(): void {
-        // On pourrait stocker cette préférence en localStorage
-        console.warn('[PWA] Install prompt dismissed');
+        this.show.set(false);
     }
 
     dismissUpdate(): void {
-        // On pourrait reporter la notification de mise à jour
-        console.warn('[PWA] Update prompt dismissed');
+        this.show.set(false);
     }
 }

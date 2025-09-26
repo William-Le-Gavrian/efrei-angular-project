@@ -180,40 +180,4 @@ export class PwaService {
             this.errorService.showError('Erreur lors de la mise à jour');
         }
     }
-
-    /**
-     * Share content with Web Share API
-     */
-    async shareContent(data: { title?: string; text?: string; url?: string }): Promise<boolean> {
-        if (!navigator.share) {
-            console.warn('[PWA] Web Share API not supported');
-            return false;
-        }
-
-        try {
-            await navigator.share(data);
-            console.warn('[PWA] Content shared successfully');
-            return true;
-        } catch (error) {
-            if ((error as Error).name !== 'AbortError') {
-                console.error('[PWA] Share failed:', error);
-                this.errorService.showError('Erreur lors du partage');
-            }
-            return false;
-        }
-    }
-
-    /**
-     * Get PWA stats
-     */
-    getStats() {
-        return {
-            isInstalled: this.isInstalled(),
-            canInstall: this.canInstall(),
-            isOnline: this.isOnline(),
-            hasUpdate: this.updateAvailable(),
-            swEnabled: this.swUpdate.isEnabled,
-            shareSupported: !!navigator.share,
-        };
-    }
 }
