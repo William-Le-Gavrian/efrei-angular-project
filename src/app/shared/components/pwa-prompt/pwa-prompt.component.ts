@@ -77,7 +77,7 @@ import { PwaService } from '../../services/pwa.service';
         }
 
         <!-- Notification de mise à jour -->
-        @if (pwaService.hasUpdate()) {
+        @if (pwaService.hasUpdate() && showUpdate()) {
             <div
                 class="position-fixed top-0 start-0 end-0 mt-3 ms-md-auto me-md-3 z-3"
                 style="max-width: 400px;"
@@ -154,6 +154,7 @@ import { PwaService } from '../../services/pwa.service';
 export class PwaPromptComponent {
     public pwaService = inject(PwaService);
     show = signal<boolean>(true);
+    showUpdate = signal<boolean>(true);
 
     async installApp(): Promise<void> {
         await this.pwaService.installApp();
@@ -168,6 +169,6 @@ export class PwaPromptComponent {
     }
 
     dismissUpdate(): void {
-        this.show.set(false);
+        this.showUpdate.set(false);
     }
 }

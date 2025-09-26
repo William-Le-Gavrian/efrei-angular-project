@@ -221,7 +221,7 @@ export class TransactionComponent {
                     );
                 }
 
-                // await this.loadTransactions();
+                this.editingTransaction.set(-1);
                 await this.cleanTransactionForm();
             } catch (error) {
                 throw new Error('Error while adding the transaction: ' + error);
