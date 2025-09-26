@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { TransactionService } from '../../services/transaction.service';
-import { Transaction } from '../../models/transaction.model';
 import { StockService } from '../../../stocks/service/stock.service';
 import { StockValue } from '../../../stocks/model/stock.model';
 
@@ -34,11 +33,11 @@ import { StockValue } from '../../../stocks/model/stock.model';
     `,
 })
 export class TransactionChartComponent {
-    transactions = signal<Transaction[]>([]);
-    stockValues = signal<StockValue[]>([]);
-
     private transactionService = inject(TransactionService);
     private stockService = inject(StockService);
+
+    transactions = this.transactionService.computedTransactions;
+    stockValues = signal<StockValue[]>([]);
 
     constructor() {
         effect(() => {
@@ -46,7 +45,8 @@ export class TransactionChartComponent {
             this.updateStocksChartData();
         });
 
-        this.loadData();
+        // this.loadBalanceData();
+        this.loadStocksData();
     }
 
     balanceChartData: ChartData<'line'> = {
@@ -90,20 +90,16 @@ export class TransactionChartComponent {
         };
     }
 
-    async loadData() {
-        const allTransactions = await this.transactionService.getAllTransactions();
-        this.transactions.set(allTransactions);
-        await this.updateBalanceChartData();
-
+    async loadStocksData() {
         const stock = await this.stockService.getStock('AAPL');
         this.stockValues.set(stock);
         await this.updateStocksChartData();
     }
 
     async updateBalanceChartData() {
-        const allTransactions = this.transactions();
+        const allTransactions = this.transactions;
 
-        const sortedTransactions = [...allTransactions].sort(
+        const sortedTransactions = [...allTransactions()].sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
         );
 

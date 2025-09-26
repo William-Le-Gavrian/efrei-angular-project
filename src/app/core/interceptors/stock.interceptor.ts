@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpHandler, HttpInterceptor, HttpRequest, HttpResponse } from '@angular/common/http';
 import { map } from 'rxjs';
 import { TwelveDataStockResponse } from '../../features/stocks/model/tweve-data-response';
+import { environment } from '../../../environnements/environment.prod';
 
 @Injectable()
 export class StockInterceptor implements HttpInterceptor {
-    private API_KEY = 'NOT_THE_REAL_KEY';
+    private API_KEY = environment.apiKey;
 
     intercept(req: HttpRequest<TwelveDataStockResponse>, next: HttpHandler) {
         const url = new URL(req.url);

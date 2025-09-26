@@ -23,13 +23,13 @@ export class PwaService {
     private swUpdate = inject(SwUpdate);
     private errorService = inject(ErrorService);
 
-    // Signals pour l'état PWA
+    // Signals for PWA state
     private deferredPrompt = signal<BeforeInstallPromptEvent | null>(null);
     private isInstalled = signal<boolean>(false);
     private isOnline = signal<boolean>(navigator.onLine);
     private updateAvailable = signal<boolean>(false);
 
-    // Computed pour l'état d'installation
+    // Computed for state install
     canInstall = computed(() => !!this.deferredPrompt() && !this.isInstalled());
 
     // État public readonly
@@ -45,17 +45,17 @@ export class PwaService {
     }
 
     /**
-     * Initialise les événements PWA
+     * Initialize PWA events
      */
     private initializePwa(): void {
-        // Détection de l'événement d'installation
+        // Install event detection
         window.addEventListener('beforeinstallprompt', (event: Event) => {
             console.warn('[PWA] Installation prompt available');
             event.preventDefault();
             this.deferredPrompt.set(event as BeforeInstallPromptEvent);
         });
 
-        // Détection si l'app est déjà installée
+        // Detect if the app is already installed
         window.addEventListener('appinstalled', () => {
             console.warn('[PWA] App installed successfully');
             this.isInstalled.set(true);
@@ -63,12 +63,12 @@ export class PwaService {
             this.errorService.showInfo('Application installée avec succès !');
         });
 
-        // Vérification initiale si l'app est en mode standalone
+        // Initial verif if the app is in standalone mode
         this.checkIfInstalled();
     }
 
     /**
-     * Vérifie si l'app est en mode standalone (installée)
+     * Verif if l'app is in standalone mode (installed)
      */
     private checkIfInstalled(): void {
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
@@ -81,7 +81,7 @@ export class PwaService {
     }
 
     /**
-     * Configure l'écoute du statut réseau
+     * Configure network status listening
      */
     private setupNetworkListener(): void {
         window.addEventListener('online', () => {
@@ -98,11 +98,11 @@ export class PwaService {
     }
 
     /**
-     * Configure l'écoute des mises à jour du service worker
+     * Configure worker service update listening
      */
     private setupUpdateListener(): void {
         if (this.swUpdate.isEnabled) {
-            // Vérification des mises à jour
+            // Updates verif
             this.swUpdate.versionUpdates
                 .pipe(filter((event): event is VersionReadyEvent => event.type === 'VERSION_READY'))
                 .subscribe(() => {
@@ -111,7 +111,6 @@ export class PwaService {
                     this.errorService.showInfo('Nouvelle version disponible !');
                 });
 
-            // Vérification périodique (toutes les 6 heures)
             setInterval(
                 () => {
                     this.swUpdate
@@ -126,12 +125,12 @@ export class PwaService {
                         });
                 },
                 6 * 60 * 60 * 1000,
-            ); // 6 heures
+            );
         }
     }
 
     /**
-     * Propose l'installation de l'app
+     * Ask for app install
      */
     async installApp(): Promise<boolean> {
         const prompt = this.deferredPrompt();
@@ -161,7 +160,7 @@ export class PwaService {
     }
 
     /**
-     * Active la mise à jour du service worker
+     * Activate service worker update
      */
     async activateUpdate(): Promise<void> {
         if (!this.swUpdate.isEnabled || !this.updateAvailable()) {
@@ -180,41 +179,5 @@ export class PwaService {
             console.error('[PWA] Update activation failed:', error);
             this.errorService.showError('Erreur lors de la mise à jour');
         }
-    }
-
-    /**
-     * Partage du contenu via l'API Web Share
-     */
-    async shareContent(data: { title?: string; text?: string; url?: string }): Promise<boolean> {
-        if (!navigator.share) {
-            console.warn('[PWA] Web Share API not supported');
-            return false;
-        }
-
-        try {
-            await navigator.share(data);
-            console.warn('[PWA] Content shared successfully');
-            return true;
-        } catch (error) {
-            if ((error as Error).name !== 'AbortError') {
-                console.error('[PWA] Share failed:', error);
-                this.errorService.showError('Erreur lors du partage');
-            }
-            return false;
-        }
-    }
-
-    /**
-     * Obtient des statistiques PWA
-     */
-    getStats() {
-        return {
-            isInstalled: this.isInstalled(),
-            canInstall: this.canInstall(),
-            isOnline: this.isOnline(),
-            hasUpdate: this.updateAvailable(),
-            swEnabled: this.swUpdate.isEnabled,
-            shareSupported: !!navigator.share,
-        };
     }
 }

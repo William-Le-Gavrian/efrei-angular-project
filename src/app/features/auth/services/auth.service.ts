@@ -55,6 +55,7 @@ export class AuthService {
             sessionStorage.setItem('currentUser', JSON.stringify(user));
             return { success: true, user };
         } else {
+            this.currentUser.set(null);
             return { success: false, error: 'Incorrect email or password' };
         }
     }

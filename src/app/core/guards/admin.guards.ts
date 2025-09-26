@@ -9,7 +9,7 @@ export const adminGuard: CanActivateFn = () => {
     if (authService.currentUser() && authService.currentUser()?.role === 'admin') {
         return true;
     } else {
-        router.navigate(['/todos']);
+        router.navigate(['/transactions']);
         return false;
     }
 };
